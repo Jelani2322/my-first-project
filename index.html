@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap">
 <style>
-/* Layout: fight-night card. Red corner vs blue corner, one screen at a time: setup, bracket, battle, champion. */
+/* Layout: fight-night card. Red corner vs blue corner, one screen at a time: players, bracket, battle, champion. */
 :root {
   --ink: #12131c;        /* arena floor */
   --canvas: #1b1d2a;     /* panels */
@@ -18,7 +18,8 @@
   --dim: #9a9db3;        /* secondary text */
   --red: #ff5a4e;        /* red corner */
   --blue: #4a86ff;       /* blue corner */
-  --gold: #f2b33d;       /* winner */
+  --gold: #f2b33d;       /* winner, topic */
+  --ok: #4cc38a;
   --font-display: "Anton", "Impact", "Arial Narrow", sans-serif;
   --font-body: "Barlow", system-ui, -apple-system, sans-serif;
   --font-label: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
@@ -26,17 +27,9 @@
 }
 * { box-sizing: border-box; }
 html, body { min-height: 100%; margin: 0; }
-body {
-  background: var(--ink);
-  color: var(--chalk);
-  font-family: var(--font-body);
-  font-size: 15px;
-  line-height: 1.45;
-}
+body { background: var(--ink); color: var(--chalk); font-family: var(--font-body); font-size: 15px; line-height: 1.45; }
 .wrap {
-  max-width: 980px;
-  margin: 0 auto;
-  padding-block: 20px 48px;
+  max-width: 980px; margin: 0 auto; padding-block: 20px 48px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
@@ -44,7 +37,7 @@ header.top {
   display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px;
   border-bottom: 1px solid var(--rope); padding-bottom: 14px; margin-bottom: 22px;
 }
-.logo { font-family: var(--font-display); font-size: 34px; letter-spacing: .5px; line-height: 1; text-transform: uppercase; margin: 0; }
+.logo { font-family: var(--font-display); font-weight: 400; font-size: 34px; letter-spacing: .5px; line-height: 1; text-transform: uppercase; margin: 0; }
 .logo .vs { color: var(--red); }
 .logo .vs2 { color: var(--blue); }
 .steps { display: flex; gap: 6px; flex-wrap: wrap; font-family: var(--font-label); text-transform: uppercase; letter-spacing: 1.2px; font-size: 13px; }
@@ -52,40 +45,52 @@ header.top {
 .steps span.on { color: var(--ink); background: var(--chalk); }
 h2 { font-family: var(--font-display); font-weight: 400; text-transform: uppercase; font-size: 30px; letter-spacing: .5px; margin: 0 0 4px; text-wrap: balance; }
 .lede { color: var(--dim); margin: 0 0 20px; max-width: 62ch; }
+.lede b { color: var(--chalk); }
 .eyebrow { font-family: var(--font-label); text-transform: uppercase; letter-spacing: 1.4px; font-size: 13px; color: var(--dim); }
-button { font: inherit; cursor: pointer; }
+button { font: inherit; cursor: pointer; color: inherit; }
+button:disabled { cursor: not-allowed; opacity: .45; }
 .btn {
   font-family: var(--font-label); font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; font-size: 16px;
   background: var(--chalk); color: var(--ink); border: 0; border-radius: 4px; padding: 12px 20px;
 }
 .btn.ghost { background: transparent; color: var(--chalk); border: 1px solid var(--rope); }
-.btn.gold { background: var(--gold); }
-.btn:focus-visible, input:focus-visible, select:focus-visible, .songcard:focus-visible, summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
-
-/* Setup */
-.roster { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
-.player { background: var(--canvas); border: 1px solid var(--rope); border-radius: 6px; padding: 12px; min-width: 0; }
-.player-head { display: flex; gap: 8px; align-items: center; }
-.seed { font-family: var(--font-display); font-size: 22px; color: var(--dim); width: 26px; text-align: center; flex: none; }
-.player input[type=text] {
+.btn.gold { background: var(--gold); color: var(--ink); }
+.btn.sm { font-size: 13px; padding: 7px 12px; }
+.btn:focus-visible, input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; align-items: center; }
+.hint { color: var(--dim); font-size: 14px; }
+input[type=text], input[type=search] {
   width: 100%; min-width: 0; background: var(--ink); color: var(--chalk); border: 1px solid var(--rope); border-radius: 4px;
   padding: 8px 10px; font: inherit;
 }
-.svc { display: flex; gap: 6px; margin: 10px 0 0 34px; }
-.svc button {
-  flex: 1; font-family: var(--font-label); font-weight: 600; letter-spacing: .8px; text-transform: uppercase; font-size: 13px;
-  background: transparent; color: var(--dim); border: 1px solid var(--rope); border-radius: 999px; padding: 5px 8px;
+.banner { background: var(--canvas); border: 1px solid var(--rope); border-left: 4px solid var(--gold); border-radius: 4px; padding: 10px 12px; margin-bottom: 18px; font-size: 14px; color: var(--dim); max-width: 75ch; }
+.banner b { color: var(--chalk); }
+
+/* Setup */
+.settings { display: grid; gap: 16px; margin-bottom: 22px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.chip {
+  font-family: var(--font-label); font-weight: 600; letter-spacing: .8px; text-transform: uppercase; font-size: 14px;
+  background: transparent; color: var(--dim); border: 1px solid var(--rope); border-radius: 999px; padding: 6px 12px;
 }
-.svc button.on { color: var(--ink); background: var(--chalk); border-color: var(--chalk); }
-details { margin: 10px 0 0 34px; }
-summary { color: var(--dim); font-size: 13px; cursor: pointer; font-family: var(--font-label); letter-spacing: 1px; text-transform: uppercase; }
-.crate { display: grid; gap: 6px; margin-top: 8px; }
-.crate label { font-size: 12px; color: var(--dim); }
+.chip.on { color: var(--ink); background: var(--chalk); border-color: var(--chalk); }
+.roster { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.player { background: var(--canvas); border: 1px solid var(--rope); border-radius: 6px; padding: 12px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.player.linked { border-color: color-mix(in srgb, var(--ok) 55%, var(--rope)); }
+.player-head { display: flex; gap: 8px; align-items: center; }
+.seed { font-family: var(--font-display); font-size: 22px; color: var(--dim); width: 26px; text-align: center; flex: none; }
+.link-row { display: flex; gap: 6px; padding-left: 34px; }
+.link-row button { flex: 1; font-family: var(--font-label); font-weight: 600; letter-spacing: .8px; text-transform: uppercase; font-size: 13px; background: transparent; border: 1px solid var(--rope); border-radius: 999px; padding: 7px 8px; }
+.link-row button:hover { border-color: var(--chalk); }
+.linked-info { padding-left: 34px; font-size: 14px; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.linked-info .okmark { color: var(--ok); font-weight: 600; }
+.linked-info .unlink { background: none; border: 0; color: var(--dim); text-decoration: underline; padding: 0; font-size: 13px; }
+.status { padding-left: 34px; font-size: 13px; color: var(--dim); }
+.status.err { color: var(--red); }
 
 /* Bracket */
 .bracket-scroll { overflow-x: auto; padding-bottom: 8px; }
-.bracket { display: grid; grid-template-columns: repeat(3, minmax(210px, 1fr)); gap: 18px; min-width: 680px; }
+.bracket { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(210px, 1fr); gap: 18px; }
 .col { display: flex; flex-direction: column; justify-content: space-around; gap: 14px; }
 .col h3 { font-family: var(--font-label); text-transform: uppercase; letter-spacing: 1.4px; font-size: 13px; color: var(--dim); margin: 0; font-weight: 600; }
 .match { background: var(--canvas); border: 1px solid var(--rope); border-radius: 6px; overflow: hidden; }
@@ -104,12 +109,15 @@ summary { color: var(--dim); font-size: 13px; cursor: pointer; font-family: var(
 .match .go { display: block; width: 100%; border: 0; border-top: 1px solid var(--rope); background: var(--gold); color: var(--ink); font-family: var(--font-label); font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; padding: 8px; }
 
 /* Battle */
-.battle-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 12px; margin-bottom: 16px; }
+.battle-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 12px; margin-bottom: 14px; }
 .rounds { display: flex; gap: 6px; }
 .pip { width: 34px; height: 8px; border-radius: 2px; background: var(--rope); }
 .pip.r { background: var(--red); }
 .pip.b { background: var(--blue); }
-.ring { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: stretch; }
+.topic { border: 2px solid var(--gold); border-radius: 8px; padding: 14px 16px; margin-bottom: 18px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+.topic .eyebrow { color: var(--gold); }
+.topic strong { font-family: var(--font-display); font-weight: 400; font-size: clamp(24px, 5vw, 36px); line-height: 1.1; text-transform: uppercase; text-wrap: balance; }
+.ring { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: start; }
 .vsmark { align-self: center; font-family: var(--font-display); font-size: 40px; color: var(--dim); }
 .corner { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
 .corner-name { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
@@ -117,25 +125,39 @@ summary { color: var(--dim); font-size: 13px; cursor: pointer; font-family: var(
 .corner.r .corner-name strong { color: var(--red); }
 .corner.b .corner-name strong { color: var(--blue); }
 .wins { font-family: var(--font-display); font-size: 26px; font-variant-numeric: tabular-nums; }
-.corner select { width: 100%; background: var(--canvas); color: var(--chalk); border: 1px solid var(--rope); border-radius: 4px; padding: 8px; font: inherit; }
-.songcard {
-  text-align: left; background: var(--canvas); border: 2px solid var(--rope); border-radius: 8px; padding: 12px; color: var(--chalk);
-  display: flex; flex-direction: column; gap: 10px; transition: transform .15s ease, border-color .15s ease;
-}
-.corner.r .songcard:hover { border-color: var(--red); }
-.corner.b .songcard:hover { border-color: var(--blue); }
-.songcard:active { transform: scale(.98); }
+.songcard { background: var(--canvas); border: 2px solid var(--rope); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.corner.r .songcard.picked { border-color: color-mix(in srgb, var(--red) 60%, var(--rope)); }
+.corner.b .songcard.picked { border-color: color-mix(in srgb, var(--blue) 60%, var(--rope)); }
 .art { aspect-ratio: 1 / 1; width: 100%; max-width: 100%; border-radius: 4px; display: grid; place-items: center; font-family: var(--font-display); font-size: 44px; color: rgba(255,255,255,.88); position: relative; overflow: hidden; }
-.art::after { content: ""; position: absolute; inset: 0; background: repeating-radial-gradient(circle at 50% 50%, rgba(0,0,0,.0) 0 6px, rgba(0,0,0,.08) 6px 7px); }
+.art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.art.empty { background: var(--ink); border: 1px dashed var(--rope); color: var(--dim); font-size: 64px; }
 .st { font-weight: 600; font-size: 17px; line-height: 1.2; overflow-wrap: anywhere; }
-.sa { color: var(--dim); font-size: 14px; }
-.pickhint { font-family: var(--font-label); text-transform: uppercase; letter-spacing: 1.2px; font-size: 12px; color: var(--dim); }
-.meter { margin-top: 18px; background: var(--canvas); border: 1px solid var(--rope); border-radius: 6px; padding: 12px; }
-.bar { display: flex; height: 14px; border-radius: 3px; overflow: hidden; background: var(--rope); margin-top: 8px; }
-.bar .rv { background: var(--red); transition: width .12s linear; }
-.bar .bv { background: var(--blue); transition: width .12s linear; margin-left: auto; }
-.counts { display: flex; justify-content: space-between; font-family: var(--font-display); font-size: 20px; font-variant-numeric: tabular-nums; margin-top: 6px; }
-.counts .r { color: var(--red); } .counts .b { color: var(--blue); }
+.sa { color: var(--dim); font-size: 14px; overflow-wrap: anywhere; }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.badge { font-family: var(--font-label); font-size: 12px; letter-spacing: .6px; text-transform: uppercase; border: 1px solid var(--rope); border-radius: 3px; padding: 1px 6px; color: var(--dim); }
+.badge.fit { color: var(--ok); border-color: var(--ok); }
+.badge.off { color: var(--gold); border-color: var(--gold); }
+.play { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; border: 0; border-radius: 999px; padding: 10px; font-family: var(--font-label); font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; font-size: 15px; color: #fff; }
+.corner.r .play { background: var(--red); }
+.corner.b .play { background: var(--blue); }
+.play .ico { width: 0; height: 0; border-left: 11px solid currentColor; border-top: 7px solid transparent; border-bottom: 7px solid transparent; }
+.play.on .ico { width: 11px; height: 13px; border: 0; border-left: 4px solid currentColor; border-right: 4px solid currentColor; }
+.textbtn { background: none; border: 0; padding: 0; color: var(--dim); text-decoration: underline; font-size: 13px; align-self: flex-start; }
+.picker { background: var(--canvas); border: 1px solid var(--rope); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.picker-list { max-height: 340px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.picker-list button { text-align: left; background: transparent; border: 0; border-radius: 4px; padding: 7px 8px; display: flex; flex-direction: column; }
+.picker-list button:hover:not(:disabled) { background: var(--rope); }
+.picker-list .pt { font-weight: 600; overflow-wrap: anywhere; }
+.picker-list .pa { color: var(--dim); font-size: 13px; overflow-wrap: anywhere; }
+.vote { margin-top: 18px; background: var(--canvas); border: 1px solid var(--rope); border-radius: 8px; padding: 14px; }
+.vote-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.vote-btn { border: 0; border-radius: 6px; padding: 14px 8px; color: #fff; font-family: var(--font-label); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 15px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.vote-btn .n { font-family: var(--font-display); font-weight: 400; font-size: 34px; line-height: 1; font-variant-numeric: tabular-nums; }
+.vote-btn.r { background: var(--red); }
+.vote-btn.b { background: var(--blue); }
+.bar { display: flex; height: 10px; border-radius: 3px; overflow: hidden; background: var(--rope); margin-top: 10px; }
+.bar .rv { background: var(--red); }
+.bar .bv { background: var(--blue); margin-left: auto; }
 .log { margin-top: 16px; display: grid; gap: 6px; }
 .log div { font-size: 14px; color: var(--dim); }
 .log b { color: var(--chalk); font-weight: 600; }
@@ -143,16 +165,18 @@ summary { color: var(--dim); font-size: 13px; cursor: pointer; font-family: var(
 /* Champion */
 .champ { text-align: center; padding: 40px 0 10px; }
 .champ .belt { font-family: var(--font-display); font-size: clamp(48px, 13vw, 110px); line-height: .95; color: var(--gold); text-transform: uppercase; overflow-wrap: anywhere; }
+.champ .lede { margin: 14px auto 0; }
 .champ .actions { justify-content: center; }
 
 .note { margin-top: 30px; border-top: 1px solid var(--rope); padding-top: 14px; color: var(--dim); font-size: 13px; max-width: 70ch; }
 
 @media (max-width: 560px) {
-  .ring { grid-template-columns: 1fr 1fr; }
+  .ring { grid-template-columns: 1fr 1fr; gap: 10px; }
   .vsmark { display: none; }
   .corner-name strong { font-size: 20px; }
   .st { font-size: 15px; }
   .art { font-size: 32px; }
+  .songcard { padding: 8px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -164,126 +188,366 @@ summary { color: var(--dim); font-size: 13px; cursor: pointer; font-family: var(
     <nav class="steps" id="steps"></nav>
   </header>
   <main id="app"></main>
-  <p class="note">Prototype. Songs are sample data and the Spotify / Apple Music choice is a label for now. A real version would sign players in with their music account, pull their actual playlists, and play a preview of each song during the round.</p>
+  <p class="note">Song previews are 30-second clips from Apple's public music catalog, so any song can be played for the crowd no matter which service a player linked. Song for Song only reads your saved songs and playlists. It never changes your account.</p>
 </div>
 
+<script src="config.js"></script>
 <script>
-const SAMPLE = [
-  { name: "Maya",   service: "spotify", songs: [["Kill Bill","SZA"],["Espresso","Sabrina Carpenter"],["Not Like Us","Kendrick Lamar"]] },
-  { name: "Dre",    service: "apple",   songs: [["HUMBLE.","Kendrick Lamar"],["SICKO MODE","Travis Scott"],["God's Plan","Drake"]] },
-  { name: "Priya",  service: "spotify", songs: [["Blinding Lights","The Weeknd"],["Levitating","Dua Lipa"],["As It Was","Harry Styles"]] },
-  { name: "Marcus", service: "apple",   songs: [["Redbone","Childish Gambino"],["Electric Feel","MGMT"],["Ivy","Frank Ocean"]] },
-  { name: "Sofia",  service: "spotify", songs: [["bad guy","Billie Eilish"],["drivers license","Olivia Rodrigo"],["Cruel Summer","Taylor Swift"]] },
-  { name: "Jay",    service: "apple",   songs: [["Lose Yourself","Eminem"],["Ms. Jackson","OutKast"],["Juicy","The Notorious B.I.G."]] },
-  { name: "Leah",   service: "spotify", songs: [["Dreams","Fleetwood Mac"],["Mr. Brightside","The Killers"],["Seven Nation Army","The White Stripes"]] },
-  { name: "Kofi",   service: "apple",   songs: [["Essence","Wizkid"],["Calm Down","Rema"],["Last Last","Burna Boy"]] },
-];
-const ROUND_NAMES = ["Quarterfinals", "Semifinals", "Final"];
+const CONFIG = Object.assign({ spotifyClientId: "", appleDeveloperToken: "" }, window.SFS_CONFIG || {});
 const SVC = { spotify: "Spotify", apple: "Apple Music" };
+const SIZES = [2, 4, 8];
+const GENRES = [
+  { name: "Any genre", keys: [] },
+  { name: "Hip-Hop", keys: ["hip-hop", "hip hop", "rap"] },
+  { name: "R&B", keys: ["r&b", "soul"] },
+  { name: "Pop", keys: ["pop"] },
+  { name: "Rock", keys: ["rock", "alternative", "metal", "punk", "indie"] },
+  { name: "Afrobeats", keys: ["afro", "african"] },
+  { name: "Latin", keys: ["latin", "reggaeton", "urbano"] },
+  { name: "Country", keys: ["country"] },
+  { name: "Electronic", keys: ["electronic", "dance", "house", "edm"] },
+  { name: "Gospel", keys: ["gospel", "christian"] },
+];
+const TOPICS = [
+  "A song about money", "Heartbreak", "Summer anthem", "A color in the title", "Best first 10 seconds",
+  "Released before 2000", "Cookout classic", "Late-night drive", "A number in the title", "Workout hype",
+  "Love song", "A song about a city or place", "One-word title", "Best collab", "Dance floor filler",
+  "Sad song you still dance to", "Confidence boost", "Rainy day", "A song your parents know", "Underrated gem",
+  "Best beat drop", "A song about friends", "Party starter", "A person's name in the title", "Whole crowd sings along",
+  "Petty song", "Main character energy", "A song about the night", "Feel-good song", "Throwback you never skip",
+];
+// Demo library: used when a service has no key set in config.js
+const DEMO_POOL = [
+  ["HUMBLE.","Kendrick Lamar","Hip-Hop/Rap"],["Not Like Us","Kendrick Lamar","Hip-Hop/Rap"],["SICKO MODE","Travis Scott","Hip-Hop/Rap"],
+  ["God's Plan","Drake","Hip-Hop/Rap"],["Lose Yourself","Eminem","Hip-Hop/Rap"],["Ms. Jackson","OutKast","Hip-Hop/Rap"],
+  ["Juicy","The Notorious B.I.G.","Hip-Hop/Rap"],["Money Trees","Kendrick Lamar","Hip-Hop/Rap"],["Gold Digger","Kanye West","Hip-Hop/Rap"],
+  ["C.R.E.A.M.","Wu-Tang Clan","Hip-Hop/Rap"],["Kill Bill","SZA","R&B/Soul"],["Redbone","Childish Gambino","R&B/Soul"],
+  ["Ivy","Frank Ocean","R&B/Soul"],["Adorn","Miguel","R&B/Soul"],["No Scrubs","TLC","R&B/Soul"],["Crazy in Love","Beyoncé","R&B/Soul"],
+  ["Espresso","Sabrina Carpenter","Pop"],["Blinding Lights","The Weeknd","Pop"],["Levitating","Dua Lipa","Pop"],
+  ["As It Was","Harry Styles","Pop"],["bad guy","Billie Eilish","Pop"],["drivers license","Olivia Rodrigo","Pop"],
+  ["Cruel Summer","Taylor Swift","Pop"],["Happy","Pharrell Williams","Pop"],["Dreams","Fleetwood Mac","Rock"],
+  ["Mr. Brightside","The Killers","Alternative"],["Seven Nation Army","The White Stripes","Alternative"],["Electric Feel","MGMT","Alternative"],
+  ["Bohemian Rhapsody","Queen","Rock"],["Smells Like Teen Spirit","Nirvana","Alternative"],["Essence","Wizkid","Afrobeats"],
+  ["Calm Down","Rema","Afrobeats"],["Last Last","Burna Boy","Afrobeats"],["love nwantiti","CKay","Afrobeats"],["Ye","Burna Boy","Afrobeats"],
+  ["Tití Me Preguntó","Bad Bunny","Latin Urbano"],["Despacito","Luis Fonsi","Latin Pop"],["Gasolina","Daddy Yankee","Latin Urbano"],
+  ["Jolene","Dolly Parton","Country"],["Tennessee Whiskey","Chris Stapleton","Country"],["One More Time","Daft Punk","Electronic"],
+  ["Titanium","David Guetta","Dance"],["Purple Rain","Prince","Pop"],["Yellow","Coldplay","Alternative"],["22","Taylor Swift","Pop"],
+];
+const DEMO_NAMES = ["Maya", "Dre", "Priya", "Marcus", "Sofia", "Jay", "Leah", "Kofi"];
 
+/* ---------- State ---------- */
 let S = freshState();
+const ui = { pickerOpen: [false, false], search: ["", ""], playing: null };
 
 function freshState() {
-  return {
-    screen: "setup",
-    players: SAMPLE.map((p, i) => ({ id: i, name: p.name, service: p.service, songs: p.songs.map(([t, a]) => ({ t, a })) })),
-    rounds: [],
-    current: null,       // [roundIndex, matchIndex]
-    voting: null,
-  };
+  return { screen: "setup", size: 4, genre: GENRES[0].name, players: DEMO_NAMES.slice(0, 4).map(newPlayer), rounds: [], current: null, champion: null };
 }
+function newPlayer(name, id) { return { id, name, service: null, account: "", library: [], loading: null, error: null }; }
 
-function save() { try { localStorage.setItem("sfs-state", JSON.stringify({ ...S, voting: null })); } catch (e) {} }
+function store(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+function fetchStored(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
+function forget(k) { try { localStorage.removeItem(k); } catch (e) {} }
+function save() { store("sfs-state-v2", S); }
 function load() {
-  try { const raw = localStorage.getItem("sfs-state"); if (raw) { S = JSON.parse(raw); S.voting = null; } } catch (e) {}
+  const saved = fetchStored("sfs-state-v2");
+  if (saved && saved.players) { S = saved; S.players.forEach(p => { p.loading = null; }); }
 }
 
-function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+/* ---------- Helpers ---------- */
+function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function hash(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function songKey(s) { return (s.t + "|" + s.a).toLowerCase(); }
+function player(id) { return S.players[id]; }
 function art(song) {
+  if (song.art) return `<div class="art"><img src="${esc(song.art)}" alt="" loading="lazy"></div>`;
   const h = hash(song.t + song.a), h1 = h % 360, h2 = (h1 + 40 + (h >> 8) % 80) % 360;
-  const initials = song.t.replace(/[^A-Za-z0-9 ]/g, "").split(" ").filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase() || "♪";
+  const initials = song.t.replace(/[^\p{L}\p{N} ]/gu, "").split(" ").filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase() || "♪";
   return `<div class="art" style="background:linear-gradient(135deg,hsl(${h1} 70% 42%),hsl(${h2} 65% 22%))">${esc(initials)}</div>`;
 }
-function player(id) { return S.players[id]; }
-
-function renderSteps() {
-  const map = { setup: 0, bracket: 1, battle: 2, champion: 3 };
-  const labels = ["Players", "Bracket", "Battle", "Champion"];
-  document.getElementById("steps").innerHTML = labels.map((l, i) => `<span class="${map[S.screen] === i ? "on" : ""}">${l}</span>`).join("");
+function genreFit(song) {
+  const g = GENRES.find(x => x.name === S.genre);
+  if (!g || !g.keys.length || !song.g) return null;
+  const sg = song.g.toLowerCase();
+  return g.keys.some(k => sg.includes(k));
+}
+function roundName(ri) {
+  return ["Final", "Semifinals", "Quarterfinals"][S.rounds.length - 1 - ri] || `Round ${ri + 1}`;
 }
 
+/* ---------- Render ---------- */
+function renderSteps() {
+  const map = { setup: 0, bracket: 1, battle: 2, champion: 3 };
+  document.getElementById("steps").innerHTML = ["Players", "Bracket", "Battle", "Champion"]
+    .map((l, i) => `<span class="${map[S.screen] === i ? "on" : ""}">${l}</span>`).join("");
+}
 function render() {
   renderSteps();
   const app = document.getElementById("app");
-  if (S.screen === "setup") app.innerHTML = setupView();
-  else if (S.screen === "bracket") app.innerHTML = bracketView();
-  else if (S.screen === "battle") app.innerHTML = battleView();
-  else app.innerHTML = champView();
+  app.innerHTML = S.screen === "setup" ? setupView() : S.screen === "bracket" ? bracketView() : S.screen === "battle" ? battleView() : champView();
   save();
 }
 
 /* ---------- Setup ---------- */
 function setupView() {
+  const demo = !CONFIG.spotifyClientId || !CONFIG.appleDeveloperToken;
+  const ready = S.players.filter(p => p.service && p.library.length >= 3).length;
   return `
-    <h2>Pick your 8 fighters</h2>
-    <p class="lede">Each player links a music service and brings a crate of 3 songs. Matches are best two out of three: win 2 song rounds and you move on. Edit the names and songs or keep the samples.</p>
-    <div class="roster">
-      ${S.players.map((p, i) => `
-        <div class="player">
-          <div class="player-head">
-            <span class="seed">${i + 1}</span>
-            <input type="text" id="name-${i}" value="${esc(p.name)}" aria-label="Player ${i + 1} name" data-act="name" data-i="${i}">
-          </div>
-          <div class="svc">
-            ${Object.entries(SVC).map(([k, v]) => `<button type="button" class="${p.service === k ? "on" : ""}" data-act="svc" data-i="${i}" data-svc="${k}">${v}</button>`).join("")}
-          </div>
-          <details>
-            <summary>Crate: ${p.songs.map(s => esc(s.t)).join(" · ")}</summary>
-            <div class="crate">
-              ${p.songs.map((s, j) => `
-                <label for="song-${i}-${j}">Song ${j + 1}</label>
-                <input type="text" id="song-${i}-${j}" value="${esc(s.t)}" data-act="song" data-i="${i}" data-j="${j}" data-f="t" aria-label="Song ${j + 1} title">
-                <input type="text" id="artist-${i}-${j}" value="${esc(s.a)}" data-act="song" data-i="${i}" data-j="${j}" data-f="a" aria-label="Song ${j + 1} artist" placeholder="Artist">
-              `).join("")}
-            </div>
-          </details>
-        </div>`).join("")}
+    <h2>Link up and pick a genre</h2>
+    <p class="lede">Every player links Spotify or Apple Music. You can only battle with songs from your own Liked Songs, library, and playlists. Each round gets a topic, and you have to find a song that fits it. Win 2 rounds out of 3 to move on.</p>
+    ${demo ? `<div class="banner"><b>Demo mode${CONFIG.spotifyClientId || CONFIG.appleDeveloperToken ? " for one service" : ""}.</b> ${!CONFIG.spotifyClientId && !CONFIG.appleDeveloperToken ? "Spotify and Apple Music aren't" : !CONFIG.spotifyClientId ? "Spotify isn't" : "Apple Music isn't"} set up yet, so linking gives that player a sample library. Add the keys in config.js to connect real accounts (see SETUP.md).</div>` : ""}
+    <div class="settings">
+      <div>
+        <span class="eyebrow">Players</span>
+        <div class="chips">${SIZES.map(n => `<button class="chip ${S.size === n ? "on" : ""}" data-act="size" data-n="${n}">${n} players</button>`).join("")}</div>
+      </div>
+      <div>
+        <span class="eyebrow">Genre for this tournament</span>
+        <div class="chips">${GENRES.map(g => `<button class="chip ${S.genre === g.name ? "on" : ""}" data-act="genre" data-g="${esc(g.name)}">${esc(g.name)}</button>`).join("")}</div>
+      </div>
     </div>
+    <div class="roster">${S.players.map(playerCard).join("")}</div>
     <div class="actions">
-      <button class="btn" data-act="start">Shuffle & start tournament</button>
+      <button class="btn" data-act="start" ${ready < S.players.length ? "disabled" : ""}>Shuffle & start tournament</button>
+      <span class="hint">${ready} of ${S.players.length} players linked</span>
     </div>`;
 }
-
-function startTournament() {
-  const ids = S.players.map(p => p.id);
-  for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
-  const qf = [];
-  for (let i = 0; i < 8; i += 2) qf.push(newMatch(ids[i], ids[i + 1]));
-  S.rounds = [qf, [newMatch(null, null), newMatch(null, null)], [newMatch(null, null)]];
-  S.screen = "bracket";
+function playerCard(p, i) {
+  const linked = p.service && p.library.length;
+  let body;
+  if (p.loading) body = `<div class="status">${esc(p.loading)}</div>`;
+  else if (linked) {
+    const sources = [...new Set(p.library.map(s => s.src))];
+    body = `<div class="linked-info"><span class="okmark">✓ ${SVC[p.service]}</span><span>${esc(p.account)} · ${p.library.length} songs from ${sources.length} ${sources.length === 1 ? "list" : "lists"}</span><button class="unlink" data-act="unlink" data-i="${i}">Unlink</button></div>`;
+  } else {
+    body = `<div class="link-row">
+      <button data-act="link" data-i="${i}" data-svc="spotify">${CONFIG.spotifyClientId ? "Link Spotify" : "Spotify (demo)"}</button>
+      <button data-act="link" data-i="${i}" data-svc="apple">${CONFIG.appleDeveloperToken ? "Link Apple Music" : "Apple Music (demo)"}</button>
+    </div>`;
+  }
+  return `
+    <div class="player ${linked ? "linked" : ""}">
+      <div class="player-head">
+        <span class="seed">${i + 1}</span>
+        <input type="text" id="name-${i}" value="${esc(p.name)}" aria-label="Player ${i + 1} name" data-act="name" data-i="${i}">
+      </div>
+      ${body}
+      ${p.error ? `<div class="status err">${esc(p.error)}</div>` : ""}
+    </div>`;
+}
+function setSize(n) {
+  while (S.players.length < n) S.players.push(newPlayer(DEMO_NAMES[S.players.length] || `Player ${S.players.length + 1}`, S.players.length));
+  S.players.length = n;
+  S.size = n;
   render();
 }
-function newMatch(a, b) { return { a, b, wins: [0, 0], log: [], winner: null, picks: [0, 0], used: [[], []] }; }
 
-/* ---------- Bracket ---------- */
+/* ---------- Linking ---------- */
+function finishLink(i, service, account, songs) {
+  const seen = new Set(), library = [];
+  for (const s of songs) { if (!s.t || seen.has(songKey(s))) continue; seen.add(songKey(s)); library.push(s); }
+  const p = S.players[i];
+  p.loading = null;
+  if (library.length < 3) { p.error = "We found fewer than 3 songs on that account. Like some songs or add a playlist, then try again."; render(); return; }
+  Object.assign(p, { service, account, library, error: null });
+  render();
+}
+function linkDemo(i, service) {
+  const songs = shuffle(DEMO_POOL).slice(0, 24).map(([t, a, g]) => ({ t, a, g, src: "Sample songs" }));
+  finishLink(i, service, "Demo library", songs);
+}
+function link(i, service) {
+  S.players[i].error = null;
+  if (service === "spotify") return CONFIG.spotifyClientId ? connectSpotify(i) : linkDemo(i, service);
+  return CONFIG.appleDeveloperToken ? connectApple(i) : linkDemo(i, service);
+}
+
+// Spotify: sign-in with PKCE, then read Liked Songs and playlists once. The token is not kept.
+const SP_SCOPES = "user-library-read playlist-read-private playlist-read-collaborative";
+function redirectUri() { return location.origin + location.pathname; }
+function b64url(buf) { return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
+async function connectSpotify(i) {
+  const verifier = b64url(crypto.getRandomValues(new Uint8Array(48)));
+  const challenge = b64url(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier)));
+  const state = b64url(crypto.getRandomValues(new Uint8Array(12)));
+  store("sfs-spotify", { verifier, slot: i, state });
+  save();
+  const q = new URLSearchParams({
+    client_id: CONFIG.spotifyClientId, response_type: "code", redirect_uri: redirectUri(),
+    code_challenge_method: "S256", code_challenge: challenge, scope: SP_SCOPES, state, show_dialog: "true",
+  });
+  location.href = "https://accounts.spotify.com/authorize?" + q;
+}
+async function finishSpotify() {
+  const q = new URLSearchParams(location.search);
+  if (!q.has("code") && !q.has("error")) return;
+  history.replaceState(null, "", redirectUri());
+  const pending = fetchStored("sfs-spotify");
+  forget("sfs-spotify");
+  if (!pending || q.get("state") !== pending.state || !S.players[pending.slot]) return;
+  const p = S.players[pending.slot];
+  if (q.has("error")) { p.error = "Spotify sign-in was cancelled."; render(); return; }
+  p.loading = "Loading your Spotify songs…"; render();
+  try {
+    const res = await fetch("https://accounts.spotify.com/api/token", {
+      method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ grant_type: "authorization_code", code: q.get("code"), redirect_uri: redirectUri(), client_id: CONFIG.spotifyClientId, code_verifier: pending.verifier }),
+    });
+    if (!res.ok) throw new Error("token " + res.status);
+    const token = (await res.json()).access_token;
+    const api = async path => {
+      const r = await fetch(path.startsWith("http") ? path : "https://api.spotify.com/v1" + path, { headers: { Authorization: "Bearer " + token } });
+      if (!r.ok) throw new Error(path + " " + r.status);
+      return r.json();
+    };
+    const me = await api("/me").catch(() => ({}));
+    const songs = [];
+    let next = "/me/tracks?limit=50";
+    while (next && songs.length < 500) {
+      const d = await api(next);
+      d.items.forEach(it => it.track && songs.push(spotifySong(it.track, "Liked Songs")));
+      next = d.next;
+    }
+    const lists = await api("/me/playlists?limit=20").catch(() => ({ items: [] }));
+    for (const list of (lists.items || []).filter(Boolean).slice(0, 15)) {
+      p.loading = `Loading playlist "${list.name}"…`; render();
+      const d = await api(`/playlists/${list.id}/items?limit=100`).catch(() => api(`/playlists/${list.id}/tracks?limit=100`)).catch(() => null);
+      if (d) d.items.forEach(it => { const t = it.item || it.track; if (t && t.type !== "episode" && t.name) songs.push(spotifySong(t, list.name)); });
+    }
+    finishLink(pending.slot, "spotify", me.display_name || "Spotify account", songs);
+  } catch (e) {
+    console.error(e);
+    p.loading = null; p.error = "Couldn't load your Spotify songs. Try linking again."; render();
+  }
+}
+function spotifySong(t, src) {
+  return { t: t.name, a: (t.artists || []).map(a => a.name).join(", "), src, art: t.album?.images?.[0]?.url || null };
+}
+
+// Apple Music: MusicKit sign-in, read library songs and playlists, then sign out so the next player can link.
+let appleMusic = null;
+function loadMusicKit() {
+  if (window.MusicKit) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://js-cdn.music.apple.com/musickit/v3/musickit.js";
+    s.onload = () => window.MusicKit ? resolve() : document.addEventListener("musickitloaded", resolve, { once: true });
+    s.onerror = () => reject(new Error("MusicKit failed to load"));
+    document.head.appendChild(s);
+  });
+}
+async function connectApple(i) {
+  const p = S.players[i];
+  p.loading = "Opening Apple Music sign-in…"; render();
+  try {
+    await loadMusicKit();
+    appleMusic = appleMusic || await MusicKit.configure({ developerToken: CONFIG.appleDeveloperToken, app: { name: "Song for Song", build: "1.0.0" } });
+    await appleMusic.authorize();
+    p.loading = "Loading your Apple Music songs…"; render();
+    const get = async path => (await appleMusic.api.music(path)).data;
+    const songs = [];
+    for (let offset = 0; songs.length < 500; offset += 100) {
+      const d = await get(`/v1/me/library/songs?limit=100&offset=${offset}`);
+      (d.data || []).forEach(x => songs.push(appleSong(x, "Library")));
+      if (!d.next) break;
+    }
+    const lists = await get("/v1/me/library/playlists?limit=25").catch(() => ({ data: [] }));
+    for (const list of (lists.data || []).slice(0, 15)) {
+      const name = list.attributes?.name || "Playlist";
+      const d = await get(`/v1/me/library/playlists/${list.id}/tracks?limit=100`).catch(() => null);
+      if (d) (d.data || []).forEach(x => songs.push(appleSong(x, name)));
+    }
+    await appleMusic.unauthorize().catch(() => {});
+    finishLink(i, "apple", "Apple Music account", songs);
+  } catch (e) {
+    console.error(e);
+    p.loading = null; p.error = "Couldn't connect Apple Music. Make sure you have an Apple Music subscription, then try again."; render();
+  }
+}
+function appleSong(x, src) {
+  const a = x.attributes || {};
+  return { t: a.name, a: a.artistName, g: (a.genreNames || []).find(g => g !== "Music"), src, preview: a.previews?.[0]?.url, art: a.artwork?.url?.replace("{w}", "600").replace("{h}", "600") };
+}
+
+/* ---------- Previews: Apple's public catalog search, works for any song ---------- */
+function itunesSearch(term) {
+  return new Promise(resolve => {
+    const cb = "sfs_cb_" + Math.random().toString(36).slice(2);
+    const s = document.createElement("script");
+    let timer;
+    const done = v => { clearTimeout(timer); delete window[cb]; s.remove(); resolve(v); };
+    window[cb] = d => done(d);
+    s.onerror = () => done(null);
+    timer = setTimeout(() => done(null), 7000);
+    s.src = "https://itunes.apple.com/search?" + new URLSearchParams({ term, entity: "song", limit: "8", callback: cb });
+    document.head.appendChild(s);
+  });
+}
+async function enrich(song) {
+  if (song.looked) return song;
+  song.looked = true;
+  const d = await itunesSearch(song.t + " " + song.a.split(",")[0]);
+  const results = (d && d.results) || [];
+  const artist = song.a.split(",")[0].toLowerCase();
+  const hit = results.find(r => r.artistName.toLowerCase().includes(artist) && r.previewUrl) || results.find(r => r.previewUrl);
+  if (hit) {
+    song.preview = song.preview || hit.previewUrl;
+    song.art = song.art || hit.artworkUrl100?.replace("100x100bb", "600x600bb");
+    song.g = song.g || hit.primaryGenreName;
+  }
+  save();
+  return song;
+}
+const audio = new Audio();
+audio.addEventListener("ended", () => { ui.playing = null; if (S.screen === "battle") render(); });
+async function play(side) {
+  if (ui.playing === side) { audio.pause(); ui.playing = null; render(); return; }
+  const song = pickedSong(side);
+  if (!song) return;
+  await enrich(song);
+  if (!song.preview) { song.noPreview = true; render(); return; }
+  audio.src = song.preview;
+  audio.play().then(() => { ui.playing = side; render(); }).catch(() => { song.noPreview = true; render(); });
+}
+function stopAudio() { audio.pause(); ui.playing = null; }
+
+/* ---------- Tournament ---------- */
+function newMatch(a, b) { return { a, b, wins: [0, 0], log: [], winner: null, picks: [null, null], used: [[], []], votes: [0, 0], topics: [] }; }
+function startTournament() {
+  const ids = shuffle(S.players.map(p => p.id));
+  const rounds = [[]];
+  for (let i = 0; i < ids.length; i += 2) rounds[0].push(newMatch(ids[i], ids[i + 1]));
+  while (rounds[rounds.length - 1].length > 1) rounds.push(Array.from({ length: rounds[rounds.length - 1].length / 2 }, () => newMatch(null, null)));
+  Object.assign(S, { rounds, screen: "bracket", champion: null });
+  render();
+}
+function nextMatch() {
+  for (let r = 0; r < S.rounds.length; r++)
+    for (let m = 0; m < S.rounds[r].length; m++) {
+      const x = S.rounds[r][m];
+      if (x.winner === null && x.a !== null && x.b !== null) return [r, m];
+    }
+  return null;
+}
 function bracketView() {
   const next = nextMatch();
+  const nx = next && S.rounds[next[0]][next[1]];
   return `
     <h2>The bracket</h2>
-    <p class="lede">${next ? `Up next: <b>${esc(player(S.rounds[next[0]][next[1]].a).name)}</b> vs <b>${esc(player(S.rounds[next[0]][next[1]].b).name)}</b> in the ${ROUND_NAMES[next[0]].toLowerCase()}.` : "All matches are done."}</p>
+    <p class="lede">${nx ? `Up next: <b>${esc(player(nx.a).name)}</b> vs <b>${esc(player(nx.b).name)}</b> in the ${roundName(next[0]).toLowerCase()}. Genre: <b>${esc(S.genre)}</b>.` : "All matches are done."}</p>
     <div class="bracket-scroll">
       <div class="bracket">
         ${S.rounds.map((round, ri) => `
           <div class="col">
-            <h3>${ROUND_NAMES[ri]}</h3>
+            <h3>${roundName(ri)}</h3>
             ${round.map((m, mi) => matchCard(m, ri, mi, next)).join("")}
           </div>`).join("")}
       </div>
     </div>
     <div class="actions">
       ${next ? `<button class="btn gold" data-act="open" data-r="${next[0]}" data-m="${next[1]}">Start next battle</button>` : ""}
-      <button class="btn ghost" data-act="reset">New tournament</button>
+      ${S.champion !== null ? `<button class="btn" data-act="champ">See champion</button>` : ""}
+      <button class="btn ghost" data-act="tosetup">Back to players</button>
     </div>`;
 }
 function matchCard(m, ri, mi, next) {
@@ -296,107 +560,124 @@ function matchCard(m, ri, mi, next) {
   };
   return `<div class="match ${isNext ? "ready" : ""}">${slot(m.a, "r")}${slot(m.b, "b")}${isNext ? `<button class="go" data-act="open" data-r="${ri}" data-m="${mi}">Battle</button>` : ""}</div>`;
 }
-function nextMatch() {
-  for (let r = 0; r < S.rounds.length; r++)
-    for (let m = 0; m < S.rounds[r].length; m++) {
-      const x = S.rounds[r][m];
-      if (x.winner === null && x.a !== null && x.b !== null) return [r, m];
-    }
-  return null;
-}
 
 /* ---------- Battle ---------- */
 function curMatch() { return S.rounds[S.current[0]][S.current[1]]; }
+function pickedSong(side) {
+  const x = curMatch(), idx = x.picks[side];
+  return idx === null ? null : player(side === 0 ? x.a : x.b).library[idx];
+}
 function openMatch(r, m) {
   S.current = [r, m];
   const x = curMatch();
-  x.picks = [firstUnused(x.a, x.used[0]), firstUnused(x.b, x.used[1])];
+  if (!x.topics.length) x.topics = shuffle(TOPICS).slice(0, 3);
+  ui.pickerOpen = [x.picks[0] === null, x.picks[1] === null];
+  ui.search = ["", ""];
   S.screen = "battle";
   render();
-}
-function firstUnused(pid, used) {
-  const n = player(pid).songs.length;
-  for (let i = 0; i < n; i++) if (!used.includes(i)) return i;
-  return 0;
 }
 function battleView() {
   const x = curMatch();
   const roundNo = x.log.length + 1;
   const pips = [0, 1, 2].map(i => `<span class="pip ${x.log[i] ? (x.log[i].w === 0 ? "r" : "b") : ""}"></span>`).join("");
-  const corner = (side) => {
-    const pid = side === 0 ? x.a : x.b, p = player(pid), song = p.songs[x.picks[side]];
-    const cls = side === 0 ? "r" : "b";
-    return `
-      <div class="corner ${cls}">
-        <div class="corner-name"><strong>${esc(p.name)}</strong><span class="wins">${x.wins[side]}</span></div>
-        <span class="eyebrow">${side === 0 ? "Red" : "Blue"} corner · ${SVC[p.service]}</span>
-        <select id="pick-${side}" data-act="pick" data-side="${side}" aria-label="${esc(p.name)} picks a song">
-          ${p.songs.map((s, i) => `<option value="${i}" ${i === x.picks[side] ? "selected" : ""} ${x.used[side].includes(i) ? "disabled" : ""}>${esc(s.t)} · ${esc(s.a)}${x.used[side].includes(i) ? " (played)" : ""}</option>`).join("")}
-        </select>
-        <button class="songcard" data-act="win" data-side="${side}" ${S.voting ? "disabled" : ""}>
-          ${art(song)}
-          <span class="st">${esc(song.t)}</span>
-          <span class="sa">${esc(song.a)}</span>
-          <span class="pickhint">Tap if this song wins the round</span>
-        </button>
-      </div>`;
-  };
-  const v = S.voting;
+  const both = x.picks[0] !== null && x.picks[1] !== null;
+  const total = x.votes[0] + x.votes[1];
   return `
     <div class="battle-head">
       <div>
-        <span class="eyebrow">${ROUND_NAMES[S.current[0]]} · Best 2 of 3</span>
+        <span class="eyebrow">${roundName(S.current[0])} · Best 2 of 3 · ${esc(S.genre)}</span>
         <h2>Round ${roundNo}</h2>
       </div>
       <div class="rounds" aria-label="Rounds played">${pips}</div>
     </div>
+    <div class="topic"><span class="eyebrow">Round ${roundNo} topic</span><strong>${esc(x.topics[x.log.length])}</strong></div>
     <div class="ring">${corner(0)}<div class="vsmark">VS</div>${corner(1)}</div>
-    <div class="meter">
+    <div class="vote">
       <span class="eyebrow">Crowd vote</span>
-      <div class="bar"><span class="rv" style="width:${v ? v.pr : 0}%"></span><span class="bv" style="width:${v ? v.pb : 0}%"></span></div>
-      <div class="counts"><span class="r">${v ? v.r : 0}</span><span class="b">${v ? v.b : 0}</span></div>
+      <p class="hint" style="margin:4px 0 0">${both ? "Play both songs, then everyone taps once for the song that fits the topic best." : "Both players need to pick a song first."}</p>
+      <div class="vote-row">
+        <button class="vote-btn r" data-act="vote" data-side="0" ${both ? "" : "disabled"}><span class="n">${x.votes[0]}</span>${esc(player(x.a).name)}</button>
+        <button class="vote-btn b" data-act="vote" data-side="1" ${both ? "" : "disabled"}><span class="n">${x.votes[1]}</span>${esc(player(x.b).name)}</button>
+      </div>
+      <div class="bar"><span class="rv" style="width:${total ? x.votes[0] / total * 100 : 0}%"></span><span class="bv" style="width:${total ? x.votes[1] / total * 100 : 0}%"></span></div>
+      <div class="actions">
+        <button class="btn gold" data-act="lock" ${both && x.votes[0] !== x.votes[1] ? "" : "disabled"}>Lock in round winner</button>
+        ${total ? `<button class="btn ghost sm" data-act="clearvotes">Reset votes</button>` : ""}
+        <button class="btn ghost sm" data-act="tobracket">Back to bracket</button>
+      </div>
+      ${both && total && x.votes[0] === x.votes[1] ? `<p class="hint">It's a tie. Break it with one more vote.</p>` : ""}
     </div>
-    <div class="actions">
-      <button class="btn gold" data-act="crowd" ${v ? "disabled" : ""}>Let the crowd decide</button>
-      <button class="btn ghost" data-act="tobracket" ${v ? "disabled" : ""}>Back to bracket</button>
-    </div>
-    ${x.log.length ? `<div class="log">${x.log.map((l, i) => `<div>Round ${i + 1}: <b>${esc(l.song)}</b> (${esc(player(l.w === 0 ? x.a : x.b).name)}) beat ${esc(l.lost)}</div>`).join("")}</div>` : ""}`;
+    ${x.log.length ? `<div class="log">${x.log.map((l, i) => `<div>Round ${i + 1} (${esc(l.topic)}): <b>${esc(l.song)}</b> by ${esc(player(l.w === 0 ? x.a : x.b).name)} beat ${esc(l.lost)}, ${l.score}</div>`).join("")}</div>` : ""}`;
 }
-
-function crowdVote() {
-  const total = 60 + Math.floor(Math.random() * 90);
-  const lean = 0.35 + Math.random() * 0.3;
-  S.voting = { r: 0, b: 0, pr: 0, pb: 0 };
-  let cast = 0;
-  const tick = () => {
-    for (let k = 0; k < 4 && cast < total; k++, cast++) Math.random() < lean ? S.voting.r++ : S.voting.b++;
-    S.voting.pr = (S.voting.r / total) * 100; S.voting.pb = (S.voting.b / total) * 100;
-    if (cast < total) { render(); setTimeout(tick, 40); }
-    else {
-      const w = S.voting.r === S.voting.b ? (Math.random() < .5 ? 0 : 1) : (S.voting.r > S.voting.b ? 0 : 1);
-      render();
-      setTimeout(() => { S.voting = null; winRound(w); }, 700);
-    }
-  };
-  tick();
-}
-
-function winRound(side) {
+function corner(side) {
   const x = curMatch();
-  const sa = player(x.a).songs[x.picks[0]], sb = player(x.b).songs[x.picks[1]];
-  const ws = side === 0 ? sa : sb, ls = side === 0 ? sb : sa;
-  x.log.push({ w: side, song: ws.t, lost: ls.t });
+  const p = player(side === 0 ? x.a : x.b), cls = side === 0 ? "r" : "b";
+  const song = pickedSong(side);
+  let card;
+  if (ui.pickerOpen[side] || !song) {
+    card = `
+      <div class="picker">
+        <label class="eyebrow" for="search-${side}">${esc(p.name)}: find a song for the topic</label>
+        <input type="search" id="search-${side}" data-act="search" data-side="${side}" value="${esc(ui.search[side])}" placeholder="Search your ${p.library.length} songs" autocomplete="off">
+        <div class="picker-list" id="list-${side}">${pickerList(side)}</div>
+        ${song ? `<button class="textbtn" data-act="closepicker" data-side="${side}">Keep ${esc(song.t)}</button>` : ""}
+      </div>`;
+  } else {
+    const fit = genreFit(song);
+    card = `
+      <div class="songcard picked">
+        ${art(song)}
+        <span class="st">${esc(song.t)}</span>
+        <span class="sa">${esc(song.a)}</span>
+        <div class="badges">
+          <span class="badge">From ${esc(song.src)}</span>
+          ${song.g ? `<span class="badge ${fit === true ? "fit" : fit === false ? "off" : ""}">${esc(song.g)}${fit === false ? ": not " + esc(S.genre) : ""}</span>` : ""}
+        </div>
+        <button class="play ${ui.playing === side ? "on" : ""}" data-act="play" data-side="${side}"><span class="ico"></span>${ui.playing === side ? "Pause" : "Play song"}</button>
+        ${song.noPreview ? `<span class="hint">No preview found for this song. Play it from your phone instead.</span>` : ""}
+        <button class="textbtn" data-act="openpicker" data-side="${side}">Change song</button>
+      </div>`;
+  }
+  return `
+    <div class="corner ${cls}">
+      <div class="corner-name"><strong>${esc(p.name)}</strong><span class="wins">${x.wins[side]}</span></div>
+      <span class="eyebrow">${side === 0 ? "Red" : "Blue"} corner · ${SVC[p.service]}</span>
+      ${card}
+    </div>`;
+}
+function pickerList(side) {
+  const x = curMatch(), p = player(side === 0 ? x.a : x.b);
+  const q = ui.search[side].trim().toLowerCase();
+  const rows = [];
+  for (let i = 0; i < p.library.length && rows.length < 60; i++) {
+    const s = p.library[i];
+    if (q && !(s.t + " " + s.a + " " + s.src).toLowerCase().includes(q)) continue;
+    const used = x.used[side].includes(i);
+    rows.push(`<button data-act="pick" data-side="${side}" data-idx="${i}" ${used ? "disabled" : ""}><span class="pt">${esc(s.t)}${used ? " (already played)" : ""}</span><span class="pa">${esc(s.a)} · ${esc(s.src)}</span></button>`);
+  }
+  return rows.join("") || `<span class="hint">No songs match "${esc(q)}".</span>`;
+}
+function pick(side, idx) {
+  const x = curMatch();
+  if (ui.playing === side) stopAudio();
+  x.picks[side] = idx;
+  ui.pickerOpen[side] = false;
+  render();
+  enrich(pickedSong(side)).then(() => { if (S.screen === "battle") render(); });
+}
+function lockRound() {
+  const x = curMatch();
+  const side = x.votes[0] > x.votes[1] ? 0 : 1;
+  const sa = pickedSong(0), sb = pickedSong(1);
+  stopAudio();
+  x.log.push({ w: side, song: (side === 0 ? sa : sb).t, lost: (side === 0 ? sb : sa).t, topic: x.topics[x.log.length], score: `${Math.max(...x.votes)}–${Math.min(...x.votes)}` });
   x.used[0].push(x.picks[0]); x.used[1].push(x.picks[1]);
   x.wins[side]++;
-  if (x.wins[side] === 2) {
-    x.winner = side === 0 ? x.a : x.b;
-    advance();
-    return;
-  }
-  x.picks = [firstUnused(x.a, x.used[0]), firstUnused(x.b, x.used[1])];
+  x.picks = [null, null]; x.votes = [0, 0];
+  if (x.wins[side] === 2) { x.winner = side === 0 ? x.a : x.b; advance(); return; }
+  ui.pickerOpen = [true, true]; ui.search = ["", ""];
   render();
 }
-
 function advance() {
   const [r, m] = S.current, x = curMatch();
   if (r === S.rounds.length - 1) { S.champion = x.winner; S.screen = "champion"; render(); return; }
@@ -409,15 +690,16 @@ function advance() {
 /* ---------- Champion ---------- */
 function champView() {
   const p = player(S.champion);
-  const fin = S.rounds[2][0];
+  const fin = S.rounds[S.rounds.length - 1][0];
+  const last = fin.log[fin.log.length - 1];
   return `
     <div class="champ">
-      <span class="eyebrow">Tournament champion · ${SVC[p.service]}</span>
+      <span class="eyebrow">${esc(S.genre)} champion · ${SVC[p.service]}</span>
       <div class="belt">${esc(p.name)}</div>
-      <p class="lede" style="margin:14px auto 0">Won the final ${Math.max(...fin.wins)}–${Math.min(...fin.wins)}. Winning song: <b>${esc(fin.log[fin.log.length - 1].song)}</b>.</p>
+      <p class="lede">Won the final ${Math.max(...fin.wins)}–${Math.min(...fin.wins)}. Winning song: <b>${esc(last.song)}</b> for "${esc(last.topic)}".</p>
       <div class="actions">
         <button class="btn ghost" data-act="tobracket">See the bracket</button>
-        <button class="btn gold" data-act="reset">Run it back</button>
+        <button class="btn gold" data-act="rematch">New tournament, same players</button>
       </div>
     </div>`;
 }
@@ -425,28 +707,37 @@ function champView() {
 /* ---------- Events ---------- */
 document.addEventListener("click", e => {
   const t = e.target.closest("[data-act]");
-  if (!t) return;
-  const act = t.dataset.act;
-  if (act === "svc") { S.players[+t.dataset.i].service = t.dataset.svc; render(); }
-  else if (act === "start") startTournament();
-  else if (act === "open") openMatch(+t.dataset.r, +t.dataset.m);
-  else if (act === "win") winRound(+t.dataset.side);
-  else if (act === "crowd") crowdVote();
-  else if (act === "tobracket") { S.screen = "bracket"; render(); }
-  else if (act === "reset") { S = freshState(); render(); }
+  if (!t || t.disabled) return;
+  const d = t.dataset, side = +d.side;
+  switch (d.act) {
+    case "size": setSize(+d.n); break;
+    case "genre": S.genre = d.g; render(); break;
+    case "link": link(+d.i, d.svc); break;
+    case "unlink": Object.assign(S.players[+d.i], { service: null, account: "", library: [], error: null }); render(); break;
+    case "start": startTournament(); break;
+    case "open": openMatch(+d.r, +d.m); break;
+    case "pick": pick(side, +d.idx); break;
+    case "openpicker": ui.pickerOpen[side] = true; ui.search[side] = ""; render(); document.getElementById("search-" + side)?.focus(); break;
+    case "closepicker": ui.pickerOpen[side] = false; render(); break;
+    case "play": play(side); break;
+    case "vote": curMatch().votes[side]++; render(); break;
+    case "clearvotes": curMatch().votes = [0, 0]; render(); break;
+    case "lock": lockRound(); break;
+    case "tobracket": stopAudio(); S.screen = "bracket"; render(); break;
+    case "tosetup": S.screen = "setup"; render(); break;
+    case "champ": S.screen = "champion"; render(); break;
+    case "rematch": Object.assign(S, { screen: "setup", rounds: [], current: null, champion: null }); render(); break;
+  }
 });
 document.addEventListener("input", e => {
-  const t = e.target, act = t.dataset.act;
-  if (act === "name") { S.players[+t.dataset.i].name = t.value || `Player ${+t.dataset.i + 1}`; save(); }
-  else if (act === "song") { S.players[+t.dataset.i].songs[+t.dataset.j][t.dataset.f] = t.value; save(); }
-});
-document.addEventListener("change", e => {
-  const t = e.target;
-  if (t.dataset.act === "pick") { curMatch().picks[+t.dataset.side] = +t.value; render(); }
+  const t = e.target, d = t.dataset;
+  if (d.act === "name") { S.players[+d.i].name = t.value || `Player ${+d.i + 1}`; save(); }
+  else if (d.act === "search") { ui.search[+d.side] = t.value; document.getElementById("list-" + d.side).innerHTML = pickerList(+d.side); }
 });
 
 load();
 render();
+finishSpotify();
 </script>
 </body>
 </html>
