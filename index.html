@@ -1,20 +1,452 @@
 <!DOCTYPE html>
-<html lang="">
-  <head>
-    <meta charset="utf-8" />
-    <title>meow</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link href="index.css" rel="stylesheet" />
-  </head>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Song for Song</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<style>
+/* Layout: fight-night card. Red corner vs blue corner, one screen at a time: setup, bracket, battle, champion. */
+:root {
+  --ink: #12131c;        /* arena floor */
+  --canvas: #1b1d2a;     /* panels */
+  --rope: #2c2f42;       /* borders */
+  --chalk: #eef0f6;      /* main text */
+  --dim: #9a9db3;        /* secondary text */
+  --red: #ff5a4e;        /* red corner */
+  --blue: #4a86ff;       /* blue corner */
+  --gold: #f2b33d;       /* winner */
+  --font-display: "Anton", "Impact", "Arial Narrow", sans-serif;
+  --font-body: "Barlow", system-ui, -apple-system, sans-serif;
+  --font-label: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; margin: 0; }
+body {
+  background: var(--ink);
+  color: var(--chalk);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.45;
+}
+.wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+header.top {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px;
+  border-bottom: 1px solid var(--rope); padding-bottom: 14px; margin-bottom: 22px;
+}
+.logo { font-family: var(--font-display); font-size: 34px; letter-spacing: .5px; line-height: 1; text-transform: uppercase; margin: 0; }
+.logo .vs { color: var(--red); }
+.logo .vs2 { color: var(--blue); }
+.steps { display: flex; gap: 6px; flex-wrap: wrap; font-family: var(--font-label); text-transform: uppercase; letter-spacing: 1.2px; font-size: 13px; }
+.steps span { color: var(--dim); padding: 3px 8px; border-radius: 3px; }
+.steps span.on { color: var(--ink); background: var(--chalk); }
+h2 { font-family: var(--font-display); font-weight: 400; text-transform: uppercase; font-size: 30px; letter-spacing: .5px; margin: 0 0 4px; text-wrap: balance; }
+.lede { color: var(--dim); margin: 0 0 20px; max-width: 62ch; }
+.eyebrow { font-family: var(--font-label); text-transform: uppercase; letter-spacing: 1.4px; font-size: 13px; color: var(--dim); }
+button { font: inherit; cursor: pointer; }
+.btn {
+  font-family: var(--font-label); font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; font-size: 16px;
+  background: var(--chalk); color: var(--ink); border: 0; border-radius: 4px; padding: 12px 20px;
+}
+.btn.ghost { background: transparent; color: var(--chalk); border: 1px solid var(--rope); }
+.btn.gold { background: var(--gold); }
+.btn:focus-visible, input:focus-visible, select:focus-visible, .songcard:focus-visible, summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
 
-  <body>
-    <h1>Grambrowz</h1>
+/* Setup */
+.roster { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.player { background: var(--canvas); border: 1px solid var(--rope); border-radius: 6px; padding: 12px; min-width: 0; }
+.player-head { display: flex; gap: 8px; align-items: center; }
+.seed { font-family: var(--font-display); font-size: 22px; color: var(--dim); width: 26px; text-align: center; flex: none; }
+.player input[type=text] {
+  width: 100%; min-width: 0; background: var(--ink); color: var(--chalk); border: 1px solid var(--rope); border-radius: 4px;
+  padding: 8px 10px; font: inherit;
+}
+.svc { display: flex; gap: 6px; margin: 10px 0 0 34px; }
+.svc button {
+  flex: 1; font-family: var(--font-label); font-weight: 600; letter-spacing: .8px; text-transform: uppercase; font-size: 13px;
+  background: transparent; color: var(--dim); border: 1px solid var(--rope); border-radius: 999px; padding: 5px 8px;
+}
+.svc button.on { color: var(--ink); background: var(--chalk); border-color: var(--chalk); }
+details { margin: 10px 0 0 34px; }
+summary { color: var(--dim); font-size: 13px; cursor: pointer; font-family: var(--font-label); letter-spacing: 1px; text-transform: uppercase; }
+.crate { display: grid; gap: 6px; margin-top: 8px; }
+.crate label { font-size: 12px; color: var(--dim); }
 
-    <form class="" action="index.html" method="post">
-      <input type="text" name="name" placeholder="type in a tag">
-      <input type="button" value="search">
-    </form>
+/* Bracket */
+.bracket-scroll { overflow-x: auto; padding-bottom: 8px; }
+.bracket { display: grid; grid-template-columns: repeat(3, minmax(210px, 1fr)); gap: 18px; min-width: 680px; }
+.col { display: flex; flex-direction: column; justify-content: space-around; gap: 14px; }
+.col h3 { font-family: var(--font-label); text-transform: uppercase; letter-spacing: 1.4px; font-size: 13px; color: var(--dim); margin: 0; font-weight: 600; }
+.match { background: var(--canvas); border: 1px solid var(--rope); border-radius: 6px; overflow: hidden; }
+.match.ready { border-color: var(--gold); }
+.slot { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-left: 4px solid transparent; }
+.slot + .slot { border-top: 1px solid var(--rope); }
+.slot.r { border-left-color: var(--red); }
+.slot.b { border-left-color: var(--blue); }
+.slot .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.slot.tbd .nm { color: var(--dim); font-weight: 400; font-style: italic; }
+.slot.lost .nm { color: var(--dim); text-decoration: line-through; }
+.slot.won .nm { color: var(--gold); }
+.slot .sc { font-family: var(--font-display); font-size: 18px; font-variant-numeric: tabular-nums; color: var(--dim); }
+.slot.won .sc { color: var(--gold); }
+.tag { font-family: var(--font-label); font-size: 11px; letter-spacing: .8px; text-transform: uppercase; color: var(--dim); border: 1px solid var(--rope); border-radius: 3px; padding: 1px 5px; flex: none; }
+.match .go { display: block; width: 100%; border: 0; border-top: 1px solid var(--rope); background: var(--gold); color: var(--ink); font-family: var(--font-label); font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; padding: 8px; }
 
-    <script src="bundle.js"></script>
-  </body>
+/* Battle */
+.battle-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 12px; margin-bottom: 16px; }
+.rounds { display: flex; gap: 6px; }
+.pip { width: 34px; height: 8px; border-radius: 2px; background: var(--rope); }
+.pip.r { background: var(--red); }
+.pip.b { background: var(--blue); }
+.ring { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: stretch; }
+.vsmark { align-self: center; font-family: var(--font-display); font-size: 40px; color: var(--dim); }
+.corner { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.corner-name { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.corner-name strong { font-family: var(--font-display); font-weight: 400; font-size: 26px; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.corner.r .corner-name strong { color: var(--red); }
+.corner.b .corner-name strong { color: var(--blue); }
+.wins { font-family: var(--font-display); font-size: 26px; font-variant-numeric: tabular-nums; }
+.corner select { width: 100%; background: var(--canvas); color: var(--chalk); border: 1px solid var(--rope); border-radius: 4px; padding: 8px; font: inherit; }
+.songcard {
+  text-align: left; background: var(--canvas); border: 2px solid var(--rope); border-radius: 8px; padding: 12px; color: var(--chalk);
+  display: flex; flex-direction: column; gap: 10px; transition: transform .15s ease, border-color .15s ease;
+}
+.corner.r .songcard:hover { border-color: var(--red); }
+.corner.b .songcard:hover { border-color: var(--blue); }
+.songcard:active { transform: scale(.98); }
+.art { aspect-ratio: 1 / 1; width: 100%; max-width: 100%; border-radius: 4px; display: grid; place-items: center; font-family: var(--font-display); font-size: 44px; color: rgba(255,255,255,.88); position: relative; overflow: hidden; }
+.art::after { content: ""; position: absolute; inset: 0; background: repeating-radial-gradient(circle at 50% 50%, rgba(0,0,0,.0) 0 6px, rgba(0,0,0,.08) 6px 7px); }
+.st { font-weight: 600; font-size: 17px; line-height: 1.2; overflow-wrap: anywhere; }
+.sa { color: var(--dim); font-size: 14px; }
+.pickhint { font-family: var(--font-label); text-transform: uppercase; letter-spacing: 1.2px; font-size: 12px; color: var(--dim); }
+.meter { margin-top: 18px; background: var(--canvas); border: 1px solid var(--rope); border-radius: 6px; padding: 12px; }
+.bar { display: flex; height: 14px; border-radius: 3px; overflow: hidden; background: var(--rope); margin-top: 8px; }
+.bar .rv { background: var(--red); transition: width .12s linear; }
+.bar .bv { background: var(--blue); transition: width .12s linear; margin-left: auto; }
+.counts { display: flex; justify-content: space-between; font-family: var(--font-display); font-size: 20px; font-variant-numeric: tabular-nums; margin-top: 6px; }
+.counts .r { color: var(--red); } .counts .b { color: var(--blue); }
+.log { margin-top: 16px; display: grid; gap: 6px; }
+.log div { font-size: 14px; color: var(--dim); }
+.log b { color: var(--chalk); font-weight: 600; }
+
+/* Champion */
+.champ { text-align: center; padding: 40px 0 10px; }
+.champ .belt { font-family: var(--font-display); font-size: clamp(48px, 13vw, 110px); line-height: .95; color: var(--gold); text-transform: uppercase; overflow-wrap: anywhere; }
+.champ .actions { justify-content: center; }
+
+.note { margin-top: 30px; border-top: 1px solid var(--rope); padding-top: 14px; color: var(--dim); font-size: 13px; max-width: 70ch; }
+
+@media (max-width: 560px) {
+  .ring { grid-template-columns: 1fr 1fr; }
+  .vsmark { display: none; }
+  .corner-name strong { font-size: 20px; }
+  .st { font-size: 15px; }
+  .art { font-size: 32px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 class="logo">Song <span class="vs">for</span> <span class="vs2">Song</span></h1>
+    <nav class="steps" id="steps"></nav>
+  </header>
+  <main id="app"></main>
+  <p class="note">Prototype. Songs are sample data and the Spotify / Apple Music choice is a label for now. A real version would sign players in with their music account, pull their actual playlists, and play a preview of each song during the round.</p>
+</div>
+
+<script>
+const SAMPLE = [
+  { name: "Maya",   service: "spotify", songs: [["Kill Bill","SZA"],["Espresso","Sabrina Carpenter"],["Not Like Us","Kendrick Lamar"]] },
+  { name: "Dre",    service: "apple",   songs: [["HUMBLE.","Kendrick Lamar"],["SICKO MODE","Travis Scott"],["God's Plan","Drake"]] },
+  { name: "Priya",  service: "spotify", songs: [["Blinding Lights","The Weeknd"],["Levitating","Dua Lipa"],["As It Was","Harry Styles"]] },
+  { name: "Marcus", service: "apple",   songs: [["Redbone","Childish Gambino"],["Electric Feel","MGMT"],["Ivy","Frank Ocean"]] },
+  { name: "Sofia",  service: "spotify", songs: [["bad guy","Billie Eilish"],["drivers license","Olivia Rodrigo"],["Cruel Summer","Taylor Swift"]] },
+  { name: "Jay",    service: "apple",   songs: [["Lose Yourself","Eminem"],["Ms. Jackson","OutKast"],["Juicy","The Notorious B.I.G."]] },
+  { name: "Leah",   service: "spotify", songs: [["Dreams","Fleetwood Mac"],["Mr. Brightside","The Killers"],["Seven Nation Army","The White Stripes"]] },
+  { name: "Kofi",   service: "apple",   songs: [["Essence","Wizkid"],["Calm Down","Rema"],["Last Last","Burna Boy"]] },
+];
+const ROUND_NAMES = ["Quarterfinals", "Semifinals", "Final"];
+const SVC = { spotify: "Spotify", apple: "Apple Music" };
+
+let S = freshState();
+
+function freshState() {
+  return {
+    screen: "setup",
+    players: SAMPLE.map((p, i) => ({ id: i, name: p.name, service: p.service, songs: p.songs.map(([t, a]) => ({ t, a })) })),
+    rounds: [],
+    current: null,       // [roundIndex, matchIndex]
+    voting: null,
+  };
+}
+
+function save() { try { localStorage.setItem("sfs-state", JSON.stringify({ ...S, voting: null })); } catch (e) {} }
+function load() {
+  try { const raw = localStorage.getItem("sfs-state"); if (raw) { S = JSON.parse(raw); S.voting = null; } } catch (e) {}
+}
+
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function hash(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
+function art(song) {
+  const h = hash(song.t + song.a), h1 = h % 360, h2 = (h1 + 40 + (h >> 8) % 80) % 360;
+  const initials = song.t.replace(/[^A-Za-z0-9 ]/g, "").split(" ").filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase() || "♪";
+  return `<div class="art" style="background:linear-gradient(135deg,hsl(${h1} 70% 42%),hsl(${h2} 65% 22%))">${esc(initials)}</div>`;
+}
+function player(id) { return S.players[id]; }
+
+function renderSteps() {
+  const map = { setup: 0, bracket: 1, battle: 2, champion: 3 };
+  const labels = ["Players", "Bracket", "Battle", "Champion"];
+  document.getElementById("steps").innerHTML = labels.map((l, i) => `<span class="${map[S.screen] === i ? "on" : ""}">${l}</span>`).join("");
+}
+
+function render() {
+  renderSteps();
+  const app = document.getElementById("app");
+  if (S.screen === "setup") app.innerHTML = setupView();
+  else if (S.screen === "bracket") app.innerHTML = bracketView();
+  else if (S.screen === "battle") app.innerHTML = battleView();
+  else app.innerHTML = champView();
+  save();
+}
+
+/* ---------- Setup ---------- */
+function setupView() {
+  return `
+    <h2>Pick your 8 fighters</h2>
+    <p class="lede">Each player links a music service and brings a crate of 3 songs. Matches are best two out of three: win 2 song rounds and you move on. Edit the names and songs or keep the samples.</p>
+    <div class="roster">
+      ${S.players.map((p, i) => `
+        <div class="player">
+          <div class="player-head">
+            <span class="seed">${i + 1}</span>
+            <input type="text" id="name-${i}" value="${esc(p.name)}" aria-label="Player ${i + 1} name" data-act="name" data-i="${i}">
+          </div>
+          <div class="svc">
+            ${Object.entries(SVC).map(([k, v]) => `<button type="button" class="${p.service === k ? "on" : ""}" data-act="svc" data-i="${i}" data-svc="${k}">${v}</button>`).join("")}
+          </div>
+          <details>
+            <summary>Crate: ${p.songs.map(s => esc(s.t)).join(" · ")}</summary>
+            <div class="crate">
+              ${p.songs.map((s, j) => `
+                <label for="song-${i}-${j}">Song ${j + 1}</label>
+                <input type="text" id="song-${i}-${j}" value="${esc(s.t)}" data-act="song" data-i="${i}" data-j="${j}" data-f="t" aria-label="Song ${j + 1} title">
+                <input type="text" id="artist-${i}-${j}" value="${esc(s.a)}" data-act="song" data-i="${i}" data-j="${j}" data-f="a" aria-label="Song ${j + 1} artist" placeholder="Artist">
+              `).join("")}
+            </div>
+          </details>
+        </div>`).join("")}
+    </div>
+    <div class="actions">
+      <button class="btn" data-act="start">Shuffle & start tournament</button>
+    </div>`;
+}
+
+function startTournament() {
+  const ids = S.players.map(p => p.id);
+  for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
+  const qf = [];
+  for (let i = 0; i < 8; i += 2) qf.push(newMatch(ids[i], ids[i + 1]));
+  S.rounds = [qf, [newMatch(null, null), newMatch(null, null)], [newMatch(null, null)]];
+  S.screen = "bracket";
+  render();
+}
+function newMatch(a, b) { return { a, b, wins: [0, 0], log: [], winner: null, picks: [0, 0], used: [[], []] }; }
+
+/* ---------- Bracket ---------- */
+function bracketView() {
+  const next = nextMatch();
+  return `
+    <h2>The bracket</h2>
+    <p class="lede">${next ? `Up next: <b>${esc(player(S.rounds[next[0]][next[1]].a).name)}</b> vs <b>${esc(player(S.rounds[next[0]][next[1]].b).name)}</b> in the ${ROUND_NAMES[next[0]].toLowerCase()}.` : "All matches are done."}</p>
+    <div class="bracket-scroll">
+      <div class="bracket">
+        ${S.rounds.map((round, ri) => `
+          <div class="col">
+            <h3>${ROUND_NAMES[ri]}</h3>
+            ${round.map((m, mi) => matchCard(m, ri, mi, next)).join("")}
+          </div>`).join("")}
+      </div>
+    </div>
+    <div class="actions">
+      ${next ? `<button class="btn gold" data-act="open" data-r="${next[0]}" data-m="${next[1]}">Start next battle</button>` : ""}
+      <button class="btn ghost" data-act="reset">New tournament</button>
+    </div>`;
+}
+function matchCard(m, ri, mi, next) {
+  const isNext = next && next[0] === ri && next[1] === mi;
+  const slot = (id, side) => {
+    if (id === null) return `<div class="slot tbd"><span class="nm">Winner advances here</span></div>`;
+    const p = player(id);
+    const cls = m.winner === null ? "" : (m.winner === id ? "won" : "lost");
+    return `<div class="slot ${side} ${cls}"><span class="nm">${esc(p.name)}</span><span class="tag">${p.service === "apple" ? "Apple" : "Spotify"}</span><span class="sc">${m.wins[side === "r" ? 0 : 1]}</span></div>`;
+  };
+  return `<div class="match ${isNext ? "ready" : ""}">${slot(m.a, "r")}${slot(m.b, "b")}${isNext ? `<button class="go" data-act="open" data-r="${ri}" data-m="${mi}">Battle</button>` : ""}</div>`;
+}
+function nextMatch() {
+  for (let r = 0; r < S.rounds.length; r++)
+    for (let m = 0; m < S.rounds[r].length; m++) {
+      const x = S.rounds[r][m];
+      if (x.winner === null && x.a !== null && x.b !== null) return [r, m];
+    }
+  return null;
+}
+
+/* ---------- Battle ---------- */
+function curMatch() { return S.rounds[S.current[0]][S.current[1]]; }
+function openMatch(r, m) {
+  S.current = [r, m];
+  const x = curMatch();
+  x.picks = [firstUnused(x.a, x.used[0]), firstUnused(x.b, x.used[1])];
+  S.screen = "battle";
+  render();
+}
+function firstUnused(pid, used) {
+  const n = player(pid).songs.length;
+  for (let i = 0; i < n; i++) if (!used.includes(i)) return i;
+  return 0;
+}
+function battleView() {
+  const x = curMatch();
+  const roundNo = x.log.length + 1;
+  const pips = [0, 1, 2].map(i => `<span class="pip ${x.log[i] ? (x.log[i].w === 0 ? "r" : "b") : ""}"></span>`).join("");
+  const corner = (side) => {
+    const pid = side === 0 ? x.a : x.b, p = player(pid), song = p.songs[x.picks[side]];
+    const cls = side === 0 ? "r" : "b";
+    return `
+      <div class="corner ${cls}">
+        <div class="corner-name"><strong>${esc(p.name)}</strong><span class="wins">${x.wins[side]}</span></div>
+        <span class="eyebrow">${side === 0 ? "Red" : "Blue"} corner · ${SVC[p.service]}</span>
+        <select id="pick-${side}" data-act="pick" data-side="${side}" aria-label="${esc(p.name)} picks a song">
+          ${p.songs.map((s, i) => `<option value="${i}" ${i === x.picks[side] ? "selected" : ""} ${x.used[side].includes(i) ? "disabled" : ""}>${esc(s.t)} · ${esc(s.a)}${x.used[side].includes(i) ? " (played)" : ""}</option>`).join("")}
+        </select>
+        <button class="songcard" data-act="win" data-side="${side}" ${S.voting ? "disabled" : ""}>
+          ${art(song)}
+          <span class="st">${esc(song.t)}</span>
+          <span class="sa">${esc(song.a)}</span>
+          <span class="pickhint">Tap if this song wins the round</span>
+        </button>
+      </div>`;
+  };
+  const v = S.voting;
+  return `
+    <div class="battle-head">
+      <div>
+        <span class="eyebrow">${ROUND_NAMES[S.current[0]]} · Best 2 of 3</span>
+        <h2>Round ${roundNo}</h2>
+      </div>
+      <div class="rounds" aria-label="Rounds played">${pips}</div>
+    </div>
+    <div class="ring">${corner(0)}<div class="vsmark">VS</div>${corner(1)}</div>
+    <div class="meter">
+      <span class="eyebrow">Crowd vote</span>
+      <div class="bar"><span class="rv" style="width:${v ? v.pr : 0}%"></span><span class="bv" style="width:${v ? v.pb : 0}%"></span></div>
+      <div class="counts"><span class="r">${v ? v.r : 0}</span><span class="b">${v ? v.b : 0}</span></div>
+    </div>
+    <div class="actions">
+      <button class="btn gold" data-act="crowd" ${v ? "disabled" : ""}>Let the crowd decide</button>
+      <button class="btn ghost" data-act="tobracket" ${v ? "disabled" : ""}>Back to bracket</button>
+    </div>
+    ${x.log.length ? `<div class="log">${x.log.map((l, i) => `<div>Round ${i + 1}: <b>${esc(l.song)}</b> (${esc(player(l.w === 0 ? x.a : x.b).name)}) beat ${esc(l.lost)}</div>`).join("")}</div>` : ""}`;
+}
+
+function crowdVote() {
+  const total = 60 + Math.floor(Math.random() * 90);
+  const lean = 0.35 + Math.random() * 0.3;
+  S.voting = { r: 0, b: 0, pr: 0, pb: 0 };
+  let cast = 0;
+  const tick = () => {
+    for (let k = 0; k < 4 && cast < total; k++, cast++) Math.random() < lean ? S.voting.r++ : S.voting.b++;
+    S.voting.pr = (S.voting.r / total) * 100; S.voting.pb = (S.voting.b / total) * 100;
+    if (cast < total) { render(); setTimeout(tick, 40); }
+    else {
+      const w = S.voting.r === S.voting.b ? (Math.random() < .5 ? 0 : 1) : (S.voting.r > S.voting.b ? 0 : 1);
+      render();
+      setTimeout(() => { S.voting = null; winRound(w); }, 700);
+    }
+  };
+  tick();
+}
+
+function winRound(side) {
+  const x = curMatch();
+  const sa = player(x.a).songs[x.picks[0]], sb = player(x.b).songs[x.picks[1]];
+  const ws = side === 0 ? sa : sb, ls = side === 0 ? sb : sa;
+  x.log.push({ w: side, song: ws.t, lost: ls.t });
+  x.used[0].push(x.picks[0]); x.used[1].push(x.picks[1]);
+  x.wins[side]++;
+  if (x.wins[side] === 2) {
+    x.winner = side === 0 ? x.a : x.b;
+    advance();
+    return;
+  }
+  x.picks = [firstUnused(x.a, x.used[0]), firstUnused(x.b, x.used[1])];
+  render();
+}
+
+function advance() {
+  const [r, m] = S.current, x = curMatch();
+  if (r === S.rounds.length - 1) { S.champion = x.winner; S.screen = "champion"; render(); return; }
+  const target = S.rounds[r + 1][Math.floor(m / 2)];
+  if (m % 2 === 0) target.a = x.winner; else target.b = x.winner;
+  S.screen = "bracket";
+  render();
+}
+
+/* ---------- Champion ---------- */
+function champView() {
+  const p = player(S.champion);
+  const fin = S.rounds[2][0];
+  return `
+    <div class="champ">
+      <span class="eyebrow">Tournament champion · ${SVC[p.service]}</span>
+      <div class="belt">${esc(p.name)}</div>
+      <p class="lede" style="margin:14px auto 0">Won the final ${Math.max(...fin.wins)}–${Math.min(...fin.wins)}. Winning song: <b>${esc(fin.log[fin.log.length - 1].song)}</b>.</p>
+      <div class="actions">
+        <button class="btn ghost" data-act="tobracket">See the bracket</button>
+        <button class="btn gold" data-act="reset">Run it back</button>
+      </div>
+    </div>`;
+}
+
+/* ---------- Events ---------- */
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-act]");
+  if (!t) return;
+  const act = t.dataset.act;
+  if (act === "svc") { S.players[+t.dataset.i].service = t.dataset.svc; render(); }
+  else if (act === "start") startTournament();
+  else if (act === "open") openMatch(+t.dataset.r, +t.dataset.m);
+  else if (act === "win") winRound(+t.dataset.side);
+  else if (act === "crowd") crowdVote();
+  else if (act === "tobracket") { S.screen = "bracket"; render(); }
+  else if (act === "reset") { S = freshState(); render(); }
+});
+document.addEventListener("input", e => {
+  const t = e.target, act = t.dataset.act;
+  if (act === "name") { S.players[+t.dataset.i].name = t.value || `Player ${+t.dataset.i + 1}`; save(); }
+  else if (act === "song") { S.players[+t.dataset.i].songs[+t.dataset.j][t.dataset.f] = t.value; save(); }
+});
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.dataset.act === "pick") { curMatch().picks[+t.dataset.side] = +t.value; render(); }
+});
+
+load();
+render();
+</script>
+</body>
 </html>
