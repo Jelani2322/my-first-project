@@ -32,3 +32,7 @@ npm test
 ```
 npm run deploy
 ```
+
+## Options Assistant
+
+An options trading helper lives in [`options-assistant/`](options-assistant/README.md).
